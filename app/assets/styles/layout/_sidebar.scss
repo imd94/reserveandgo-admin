@@ -1,0 +1,56 @@
+.app-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 34.5rem;
+  height: 100%;
+  padding-top: 12rem;
+  background-color: var(--white);
+  z-index: 4;
+
+  &__list-wrapper {
+    max-height: calc(100dvh - 13.5rem);
+    overflow-y: auto;
+  }
+
+  &__list {
+    padding-top: 1.5rem;
+  }
+
+  &__item {
+    padding: .5rem 3rem;
+  }
+
+  &__link {
+    font-size: 1.7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem 2rem;
+    border-radius: 0;
+    transition: .3s all ease;
+
+    &:hover {
+      color: var(--primary);
+
+      .app-nav__link__icon {
+        fill: var(--primary);
+      }
+    }
+
+    &__icon {
+      transition: .3s all ease;
+    }
+
+    &.active {
+      background-color: var(--primary);
+      color: var(--white);
+      border-radius: 8rem;
+
+      .app-nav__link__icon {
+        fill: var(--white);
+      }
+    }
+  }
+}
