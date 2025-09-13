@@ -1,18 +1,25 @@
 import React, { useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import AdminDash from './AdminDash';
 import { UseGlobalState } from './Context/GlobalContext';
+import AdminDash from './AdminDash';
+import LoadingSpinner from './LoadingSpinner';
 
-function RootPage({ isLoggedIn  }) {
+function RootPage() {
   const { appState } = UseGlobalState();
   const location = useLocation();
 
-  if (!appState.isLoggedIn) {
-    // redirect to /login but keep track of where the user wanted to go
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  if(appState.globalLoaderActive) {
+    return <LoadingSpinner />;
   }
 
-  return <AdminDash />;
+  if(appState.isLoggedIn && !appState.globalLoaderActive) {
+    return <AdminDash />;
+  }
+
+  if(!appState.isLoggedIn && !appState.globalLoaderActive) {
+    // redirect to /login but keep track of where the user wanted to go
+    return <Navigate to="/login" state={{ from: location }} replace></Navigate>; // can't use flash message with this
+  }
 }
 
 export default RootPage;

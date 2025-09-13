@@ -1,30 +1,39 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, Navigate } from "react-router-dom";
 import Page from './Page';
 import { UseGlobalDispatch } from './Context/GlobalContext';
 import { UseGlobalState } from './Context/GlobalContext';
+import axios from "axios";
 
 function Login() {
   const { appDispatch } = UseGlobalDispatch();
   const { appState } = UseGlobalState();
   const navigate = useNavigate();
   const location = useLocation();
-
-  if(appState.isLoggedIn) {
-    return <Navigate to="/" />;
-  }
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
 
   // fallback to home if no "from" is provided
-  const from = location.state?.from?.pathname || "/";
+  const from = location.state?.from?.pathname || location.state?.from || "/";
 
-  function handleLogin(e) {
+  async function handleLogin(e) {
     e.preventDefault();
 
-    // your login logic here (e.g. set token, context, etc.)
-    appDispatch({ type: 'login', value: true });
+    try {
+      const response = await axios.post('/login', { email: loginEmail, password: loginPassword});
+      if(response.data.user) {
+        appDispatch({ type: 'login' });
+        appDispatch({ type: "getUser", value: response.data.user.id });
+        appDispatch({ type: 'flashMessage', value: 'Welcome to your admin panel.', class: 'success' });
+      }
+    } catch(error) {
+      console.log(error);
+      appDispatch({ type: 'flashMessage', value: error.response.data.message, class: 'danger' });
+    }
+  }
 
-    // after login, redirect back
-    navigate(from, { replace: true });
+  if(appState.isLoggedIn) {
+    return <Navigate to={from} replace />;
   }
 
   return (
@@ -40,12 +49,12 @@ function Login() {
 
             <div className="field-group">
               <label htmlFor="email">Email Address</label>
-              <input type="text" id="email" name="email" className="input-field" placeholder="you@example.com" />
+              <input onChange={ (e) => setLoginEmail(e.target.value) } value={ loginEmail } type="text" id="email" name="email" className="input-field" placeholder="you@example.com" />
             </div>
 
             <div className="field-group">
               <label htmlFor="password">Password</label>
-              <input type="password" id="password" name="password" className="input-field" placeholder="••••••••" />
+              <input onChange={ (e) => setLoginPassword(e.target.value) } value={ loginPassword } type="password" id="password" name="password" className="input-field" placeholder="••••••••" />
             </div>
 
             <button type="submit" className="button button--primary button--no-splash">Prijavi se</button>

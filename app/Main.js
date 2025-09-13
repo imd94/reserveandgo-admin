@@ -7,6 +7,7 @@ import Axios from 'axios';
 import './assets/styles/styles.scss';
 
 Axios.defaults.baseURL = process.env.REACT_APP_API_URL;
+Axios.defaults.withCredentials = true;
 
 // Components
 import { GlobalProvider } from './components/Context/GlobalContext';

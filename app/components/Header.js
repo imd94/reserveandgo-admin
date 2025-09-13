@@ -1,12 +1,17 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { UseGlobalState } from './Context/GlobalContext';
+import { UseGlobalDispatch } from './Context/GlobalContext';
 import UseClickOutside from './Hooks/UseClickOutside';
+import axios from "axios";
 
 function Header() {
   const { appState } = UseGlobalState();
+  const { appDispatch } = UseGlobalDispatch();
   const [ menuOpen, setMenuOpen ] = useState(true);
   const [ profileDropdownOpen, setProfileDropdownOpen ] = useState(false);
+  const [logOut, setLogOut] = useState(false);
+  const navigate = useNavigate();
   const dropdownRef = useRef(null);
 
   // Use the custom hook
@@ -15,6 +20,31 @@ function Header() {
       setProfileDropdownOpen(false);
     }
   });
+
+  useEffect(() => {
+    if(logOut) {
+      const ourRequest = axios.CancelToken.source();
+
+      async function fetchLogOut() {
+        try {
+          const response = await axios.get("/logout", { cancelToken: ourRequest.token, withCredentials: true });
+          if(response.data.status === 'success') {
+            appDispatch({ type: 'logout' });
+            appDispatch({ type: 'flashMessage', value: 'You have been successfully logged out.', class: 'success' });
+            navigate('/login');
+          }
+        } catch (e) {
+          console.log("There was a problem in logout request or the request was cancelled.")
+        }
+      }
+      fetchLogOut();
+
+      return () => {
+        ourRequest.cancel();
+        setLogOut(false);
+      }
+    }
+  }, [logOut]);
 
   return (
     <header className="app-header">
@@ -55,7 +85,7 @@ function Header() {
                     Profile
                   </Link>
 
-                  <button className="dropdown-item__link">
+                  <button onClick={ () => setLogOut(true) } className="dropdown-item__link">
                     <span className="dropdown-item__icon-wrapper">
                       <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="var(--primary)"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/></svg>
                     </span>
